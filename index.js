@@ -314,6 +314,16 @@ export function blend(hexColor1, hexColor2, weight = 0.5) {
   return blendedHexColor;
 }
 
+export function getRandomColor() {
+  const randomR = Math.floor(Math.random() * 256);
+  const randomG = Math.floor(Math.random() * 256);
+  const randomB = Math.floor(Math.random() * 256);
+
+  const randomHexColor = `#${(1 << 24 | randomR << 16 | randomG << 8 | randomB).toString(16).slice(1)}`;
+
+  return randomHexColor;
+}
+
 function hueToRGB(p, q, t) {
   if (t < 0) t += 1;
   if (t > 1) t -= 1;

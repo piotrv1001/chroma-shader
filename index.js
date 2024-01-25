@@ -324,6 +324,37 @@ export function getRandomColor() {
   return randomHexColor;
 }
 
+export function getContrastRatio(color1, color2) {
+  const hexRegex = /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+  if (!hexRegex.test(color1) || !hexRegex.test(color2)) {
+    throw new Error('Invalid HEX color code');
+  }
+
+  color1 = color1.replace(/^#/, '');
+  color2 = color2.replace(/^#/, '');
+
+  const luminance1 = getLuminance(color1);
+  const luminance2 = getLuminance(color2);
+
+  const contrastRatio = (Math.max(luminance1, luminance2) + 0.05) / (Math.min(luminance1, luminance2) + 0.05);
+
+  return contrastRatio.toFixed(2);
+}
+
+function getLuminance(hexColor) {
+  const r = parseInt(hexColor.slice(0, 2), 16) / 255;
+  const g = parseInt(hexColor.slice(2, 4), 16) / 255;
+  const b = parseInt(hexColor.slice(4, 6), 16) / 255;
+
+  const gammaCorrectedR = (r <= 0.03928) ? (r / 12.92) : Math.pow((r + 0.055) / 1.055, 2.4);
+  const gammaCorrectedG = (g <= 0.03928) ? (g / 12.92) : Math.pow((g + 0.055) / 1.055, 2.4);
+  const gammaCorrectedB = (b <= 0.03928) ? (b / 12.92) : Math.pow((b + 0.055) / 1.055, 2.4);
+
+  const luminance = 0.2126 * gammaCorrectedR + 0.7152 * gammaCorrectedG + 0.0722 * gammaCorrectedB;
+
+  return luminance;
+}
+
 function hueToRGB(p, q, t) {
   if (t < 0) t += 1;
   if (t > 1) t -= 1;

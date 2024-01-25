@@ -239,6 +239,81 @@ export function hslToRGB(hslColor) {
   return { r, g, b };
 }
 
+export function getComplementaryColor(hexColor) {
+  const hexRegex = /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+  if (!hexRegex.test(hexColor)) {
+    throw new Error("Invalid HEX color code");
+  }
+
+  hexColor = hexColor.replace(/^#/, "");
+
+  let r, g, b;
+  if (hexColor.length === 3) {
+    r = parseInt(hexColor[0] + hexColor[0], 16);
+    g = parseInt(hexColor[1] + hexColor[1], 16);
+    b = parseInt(hexColor[2] + hexColor[2], 16);
+  } else {
+    r = parseInt(hexColor.slice(0, 2), 16);
+    g = parseInt(hexColor.slice(2, 4), 16);
+    b = parseInt(hexColor.slice(4, 6), 16);
+  }
+
+  let hue = rgbToHSL({ r, g, b }).h;
+  hue = (hue + 180) % 360;
+
+  const { r: compR, g: compG, b: compB } = hslToRGB({ h: hue, s: 100, l: 50 });
+
+  const complementaryHexColor = `#${(
+    (1 << 24) |
+    (compR << 16) |
+    (compG << 8) |
+    compB
+  )
+    .toString(16)
+    .slice(1)}`;
+
+  return complementaryHexColor;
+}
+
+export function blend(hexColor1, hexColor2, weight = 0.5) {
+  const hexRegex = /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+  if (!hexRegex.test(hexColor1) || !hexRegex.test(hexColor2)) {
+    throw new Error("Invalid HEX color code");
+  }
+
+  hexColor1 = hexColor1.replace(/^#/, "");
+  hexColor2 = hexColor2.replace(/^#/, "");
+
+  const rgbColor1 = {
+    r: parseInt(hexColor1.slice(0, 2), 16),
+    g: parseInt(hexColor1.slice(2, 4), 16),
+    b: parseInt(hexColor1.slice(4, 6), 16),
+  };
+
+  const rgbColor2 = {
+    r: parseInt(hexColor2.slice(0, 2), 16),
+    g: parseInt(hexColor2.slice(2, 4), 16),
+    b: parseInt(hexColor2.slice(4, 6), 16),
+  };
+
+  const blendedColor = {
+    r: Math.round((1 - weight) * rgbColor1.r + weight * rgbColor2.r),
+    g: Math.round((1 - weight) * rgbColor1.g + weight * rgbColor2.g),
+    b: Math.round((1 - weight) * rgbColor1.b + weight * rgbColor2.b),
+  };
+
+  const blendedHexColor = `#${(
+    (1 << 24) |
+    (blendedColor.r << 16) |
+    (blendedColor.g << 8) |
+    blendedColor.b
+  )
+    .toString(16)
+    .slice(1)}`;
+
+  return blendedHexColor;
+}
+
 function hueToRGB(p, q, t) {
   if (t < 0) t += 1;
   if (t > 1) t -= 1;
